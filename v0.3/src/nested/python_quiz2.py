@@ -1,3 +1,5 @@
+### requires pandas. If you haven't installed pandas, just create a PythonQuiz Object :)
+
 import numpy
 import random
 import pandas
@@ -51,38 +53,54 @@ class PQLevelTwo(PythonQuiz):
         if int == outer_keys:
             base = dict(enumerate([self.simple_dict(size=size) for i in range(rows)]))
         elif str == outer_keys:
-            base = dict([(self.make_str(force_length=2), self.simple_dict(size=size)) for i in range(rows)])   
- 
+            base = dict([(self.make_str(force_length=1), self.simple_dict(size=size)) for i in range(rows)])   
+            
         dict_selection = random.choice([x for x in base.keys()]) 
         pair_selection = random.choice([x for x in base[dict_selection].keys()]) 
         return base, dict_selection, pair_selection, base[dict_selection][pair_selection]
         
       
-    #### NEW GAMES
     ### GAME G
     def guess_the_index_nested(self,dims=2,width=4):
         response = ''
         while response != 'quit': 
 
-            mtrx, correct_index, correct_value = self.nested_list_indexing(dims=dims,width=width)
-            pprint.pprint(mtrx) # only works in anaconda
-            response = input(f"What is the 'row and column' (`x,y`) of {correct_value} in the 2-D matrix above? ")
-            try:
-                response = tuple(eval(response))
-            except:
-                pass
-            if tuple(response) == correct_index:
+            base, correct_index, correct_value = self.nested_list_indexing(dims=dims,width=width)
+            pprint.pprint(base) # only works in anaconda
+            
+            if type(correct_value) == str:
+                correct_value = f"'{correct_value}'"
+                
+            #response = input(f"What is the row and column `x,y` (0-indexed) of {correct_value}? ")
+            response = input(f"If the 2-D matrix is called `base`, how would you index for {correct_value}? ")
+
+            if response != 'quit':
+                try:
+                    #response = tuple(eval(response))
+                    response = eval(response)
+                    self.increment_tries()
+
+                except:
+                    print(response, 'isnt a valid response')
+                    continue
+                    
+            #if tuple(response) == correct_index:
+            if response == correct_value:
                 self.increment_score()
                 pprint.pprint('**** You Win ****!')
-            if response != 'quit':
-                self.increment_tries()
 
     ### GAME H
-    def nested_dict_indexing(self, outer_keys=int,rows=4, size=4):
+    def nested_dict_indexing(self, rows=4, size=4):
         response = ''
+        key_type = int
         while response != 'quit':
+            
 
-            base, first_index, second_index, value = self.keys_and_values_nested(outer_keys=outer_keys,
+            if key_type == str:
+                key_type = int
+            elif key_type == str:
+                key_
+            base, first_index, second_index, value = self.keys_and_values_nested(outer_keys=key_type,
                                                                                 rows=rows,
                                                                                 size=size)
             pprint.pprint(base)
