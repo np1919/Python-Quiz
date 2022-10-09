@@ -1,0 +1,22 @@
+# faced with the issue of data extraction from a daily, advertiser db
+# base on lookups from a third source/database
+
+Folder Structure
+# src
+    
+    # base
+        # connection + data extraction functions
+        # data extraction class?
+
+    # lookups class -- get all necessary information for lookup; dates, timezone
+        # use data connection/extraction/transformation functions
+    # request class
+        # run the lookups class --> or read from memory
+        # generate base columns, base aliases; allow case/when mappings
+        # provide option to extract raw data
+    # nested
+        # map aggregate functions to outer columns, outer aliases;
+        # provide option to extract nested query data
+    
+    
+    # explain how to perform common algorithms in pandas
