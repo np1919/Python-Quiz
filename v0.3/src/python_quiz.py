@@ -3,7 +3,7 @@ import random
 import pandas
 import string as string_functions 
 import pprint
-from .common_functions import CommonFunctions
+from common_functions import CommonFunctions
 
 class PythonQuiz(CommonFunctions):
             
@@ -39,7 +39,11 @@ class PythonQuiz(CommonFunctions):
                            'Simple Multiple Choice' : self.simple_multiple_choice,
                            'Guess the len()' : self.guess_the_len,
                            'Guess the index' : self.guess_the_index,
-                           'Complex Multiple Choice' : self.generate_multiple_choice}
+                           'Complex Multiple Choice' : self.generate_multiple_choice,
+                           'Guess the index (nested lists)':self.guess_the_index_nested,
+                           'Nested `dict` indexing practice':self.nested_dict_indexing
+                           
+                           }
         
         
         self.question_mappings = {dict:{'get': 'return the value from the dictionary using the given key. note: pass an additional argument to assign a default return value (currently `None`)',
@@ -118,27 +122,7 @@ class PythonQuiz(CommonFunctions):
     
     def increment_tries(self):
         self._total_tries += 1
-    
-    def start_menu(self):
-        response = ''
-        while response != 'quit':
-            try:
-                print('Pick a Game:')
-                pprint.pprint(self.game_menu)
-                response = input()
-                try:
-                    self.run_game(response)
-                except:
-                    pass
-            except:
-                pass
-        try:
-            print(f'Exiting. You got {self.score} right, out of {self.tries} tries. Thats {round(self.score/self.tries*100,2)}%!')
-        except:
-            pass      
-    def run_game(self, choice):
-        return self.all_games[self.game_menu[choice]]()
-    
+
     @property
     def all_types(self):
         return list(self.simple_examples.keys())
@@ -367,3 +351,144 @@ class PythonQuiz(CommonFunctions):
                     pass
                 if response != 'quit':
                     self.increment_tries()
+
+#####################################################################################
+
+    ### LIST PRACTICE    
+    def make_matrix(self, dims=2, width=4):
+        """ensures all values are unique"""
+        output = []
+        for nesting in range(dims-1): #indexing starts at 0
+            for i in range(1,width+1):
+                row = [self.simple_value() for x in range(width)]
+                while len(set(row)) != len(row):
+                    row = [self.simple_value() for x in range(width)]
+                output.append(row)
+        return output
+
+
+    def nested_list_indexing(self, dims=2, width=4):
+        mtrx = self.make_matrix(dims=dims, width=width)
+        c = pandas.DataFrame(mtrx).shape
+        random_index = random.choice(range(1,c[0]*c[1]+1))
+        rows = 0
+        while random_index > 3:
+            rows += 1
+            random_index -= 4
+        
+        return mtrx, (rows,random_index), mtrx[rows][random_index]
+    
+    #### DICT PRACTICE 
+    
+    def keys_and_values(self, size=4):
+        base = self.simple_dict(size=size)
+        pair_selection = random.choice([x for x in base.keys()]) 
+        return base,pair_selection,base[pair_selection]
+        
+        
+    def keys_and_values_nested(self, outer_keys=int,rows=4, size=4):              
+        if int == outer_keys:
+            base = dict(enumerate([self.simple_dict(size=size) for i in range(rows)]))
+        elif str == outer_keys:
+            base = dict([(self.make_str(force_length=1), self.simple_dict(size=size)) for i in range(rows)])   
+            
+        dict_selection = random.choice([x for x in base.keys()]) 
+        pair_selection = random.choice([x for x in base[dict_selection].keys()]) 
+        return base, dict_selection, pair_selection, base[dict_selection][pair_selection]
+        
+     #####################################################################################
+#####################################################################################
+ 
+    ### GAME G
+    def guess_the_index_nested(self,dims=2,width=4):
+        response = ''
+        while response != 'quit': 
+
+            base, correct_index, correct_value = self.nested_list_indexing(dims=dims,width=width)
+            pprint.pprint(base) 
+
+            # if type(correct_value) == str:
+            #     correct_value = f"'{correct_value}'"
+                
+            #response = input(f"What is the row and column `x,y` (0-indexed) of {correct_value}? ")
+            response = input(f"If the 2-D matrix is called `base`, how would you index for {correct_value}? ")
+
+            if response != 'quit':
+                try:
+                    #response = tuple(eval(response))
+                    response = eval(response)
+                    print(response)
+                    self.increment_tries()
+
+                except:
+                    print(response, 'isnt a valid response')
+                    continue
+                    
+            #if tuple(response) == correct_index:
+            if response == correct_value:
+                self.increment_score()
+                pprint.pprint('**** You Win ****!')
+
+    ### GAME H
+    def nested_dict_indexing(self, rows=4, size=4):
+        response = ''
+        key_type = int
+        while response != 'quit':
+            
+
+            if key_type == str:
+                key_type = int
+            elif key_type == str:
+                key_
+            base, first_index, second_index, value = self.keys_and_values_nested(outer_keys=key_type,
+                                                                                rows=rows,
+                                                                                size=size)
+            pprint.pprint(base)
+            response = input(f"If this nested dictionary is called `base`, what is the correct way to index for value `{value}`? ")
+            if response == 'quit':
+                break
+            try:
+                response = eval(response)
+            except:
+                response = f'{response}'
+            #print(response,  f'base[{first_index}][{second_index}]' )
+            if response == value:#f'base[{first_index}][{second_index}]':
+                pprint.pprint('**** You Win ****!')
+                self.increment_score()
+            if response != 'quit':
+                self.increment_tries()
+
+
+######## RUNTIME ########
+    
+    def run_game(self, choice):
+        '''each game is a function, and must be executed using parentheses'''
+        return self.all_games[self.game_menu[choice]]()
+    
+
+    def start_menu(self):
+        response = ''
+        while response != 'quit':
+            try:
+                print('Pick a Game:')
+                pprint.pprint(self.game_menu)
+                response = input()
+                try:
+                    self.run_game(response)
+                    print()
+
+                except:
+                    pass
+            except:
+                pass
+            
+        try:
+            print(f'Exiting. You got {self.score} right, out of {self.tries} tries. Thats {round(self.score/self.tries*100,2)}%!')
+        except:
+            pass      
+
+        
+    
+if __name__ == '__main__':
+    a = PythonQuiz()
+    a.start_menu()
